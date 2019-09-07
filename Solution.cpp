@@ -43,10 +43,13 @@ unsigned int Solution::construction()
     srand(time(NULL));
     int random_index = rand() % (candidates.size());
 
-    unsigned int current_demand;
+    // Balance after "insertion"
+    unsigned int balance;
 
     // Cadidate analyzed
     unsigned int current_candidate = candidates[random_index];
+    unsigned int current_demand;
+
     //printf("Candidate: %u\n", current_candidate);
 
     // Position in which the candidate will be inserted
@@ -84,7 +87,7 @@ unsigned int Solution::construction()
         unsigned int previous_value = routes[r][i - 1];
 
         //Checking what change ocurred with node "insertion"
-        unsigned int balance =
+        balance =
             total_cost +
             (this->s->distances_between_clients[previous_value][current_candidate] +
              this->s->distances_between_clients[current_candidate][current_value]) -
@@ -130,6 +133,8 @@ unsigned int Solution::construction()
 
       route_demands[free_route] += this->s->demands_per_client[current_candidate];
     }
+    //Updating total cost
+    total_cost += balance;
 
     //Removing cadidate from list
     candidates.erase(candidates.begin() + random_index);
