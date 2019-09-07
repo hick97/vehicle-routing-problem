@@ -123,18 +123,24 @@ unsigned int Solution::construction()
       auto itPos = routes[final_candidate_route].begin() + final_candidate_route_position;
       routes[final_candidate_route].insert(itPos, current_candidate);
       route_demands[final_candidate_route] += current_demand;
+
+      //Updating total cost
+      total_cost = balance;
     }
     else
     {
       //If there is no improvement:
+      //Updating total cost
+      total_cost = total_cost +
+                   (this->s->distances_between_clients[current_candidate][0] +
+                    this->s->distances_between_clients[current_candidate][routes[free_route][routes[free_route].size() - 2]]);
+
       // Inserting candidate in last free route
       auto itPos = routes[free_route].end() - 1;
       routes[free_route].insert(itPos, current_candidate);
 
       route_demands[free_route] += this->s->demands_per_client[current_candidate];
     }
-    //Updating total cost
-    total_cost += balance;
 
     //Removing cadidate from list
     candidates.erase(candidates.begin() + random_index);
@@ -148,6 +154,7 @@ unsigned int Solution::construction()
     cout << "\n";
     */
   }
+  printf("Final cost: %d\n", total_cost);
 
   // Printando rotas:
   printf("Final routes: \n");
