@@ -125,7 +125,7 @@ unsigned int Solution::construction()
       route_demands[final_candidate_route] += current_demand;
 
       //Updating total cost
-      total_cost = balance;
+      total_cost = better_cost;
     }
     else
     {
