@@ -181,6 +181,12 @@ void Solution::vnd()
       {
 
         //TODO: call moviment
+        /*
+        bool improved = firstMoviment();
+
+        if (!improved)
+          break;
+        */
 
         //TODO: comparing moviment result with global result
         //TODO: if improved, global = moviment result, if dont improved break;
@@ -197,8 +203,10 @@ void Solution::vnd()
     //TODO: if improved, global = moviment result, if dont improved break;
   }
 }
-void Solution::firstMoviment()
+bool Solution::firstMoviment()
 {
+  bool improved = false;
+
   //Starting candidates list with all clients
   vector<unsigned int> candidates;
   for (auto i = 1; i < this->s->demands_per_client.size(); i++)
@@ -285,6 +293,8 @@ void Solution::firstMoviment()
     }
     if (final_candidate_route != -1 && final_candidate_route_position != -1)
     {
+      improved = true;
+
       // Real insertition
       auto itPos = this->routes[final_candidate_route].begin() + final_candidate_route_position;
       this->routes[final_candidate_route].insert(itPos, current_candidate);
@@ -325,6 +335,8 @@ void Solution::firstMoviment()
   }
 
   cout << "\n";
+
+  return improved;
 
   // Printando rotas:
   /*

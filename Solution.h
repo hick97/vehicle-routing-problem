@@ -13,7 +13,7 @@ struct Solution
   Solution(Scenary *scenary);
   void construction();
   void vnd();
-  void firstMoviment();
+  bool firstMoviment();
   pair<int, int> getClientPositionInRoutes(unsigned int value);
   bool swap_best_block_neighbor(short int block_size);
 };
