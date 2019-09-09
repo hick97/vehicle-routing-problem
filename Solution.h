@@ -13,6 +13,8 @@ struct Solution
   Solution(Scenary *scenary);
   void construction();
   void vnd();
+  void print_state();
+  void print_real_state();
   bool firstMoviment();
   bool secondMoviment();
   bool thirdMoviment();
