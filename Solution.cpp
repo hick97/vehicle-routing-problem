@@ -133,10 +133,10 @@ void Solution::construction()
     candidates.erase(candidates.begin() + random_index);
   }
 
-  printf("Final cost: %d\n", this->fitness);
+  printf("Constructed route cost: %d\n", this->fitness);
 
   // Printando rotas:
-  printf("Final routes: \n");
+  printf("Constructed routes: \n");
 
   for (int i = 0; i < this->routes.size(); i++)
   {
@@ -168,20 +168,47 @@ void Solution::construction()
 }
 
 
-void Solution::print_routes(){
-  std::cout << "Current cost = " << this->fitness << "\n";
+void Solution::print_state(){
+  std::cout << "Current cost = " << this->fitness << "\nRoutes = \n";
 
   for(auto &route : this->routes){
+    std::cout << "[";
     for(auto &client : route){
-      std::cout << client << " ";
+      std::cout << client << ", ";
     }
-    std::cout << "\n";
+    std::cout << "],\n";
   }
+
+  std::cout << "Demands = [";
+  for(auto &demand : this->route_demands){
+    std::cout << demand << ", ";
+  }
+  std::cout << "],\n";
+}
+
+void Solution::print_real_state(){
+  unsigned int cost = 0;
+  for(auto &route : this->routes){
+    for(unsigned int c = 1; c < route.size(); c++){
+      cost += this->s->distances_between_clients[route[c-1]][route[c]];
+    }
+  }
+  std::cout << "Real cost should be = " << cost << "\n";
+
+  std::cout << "Real demands should be = [";
+  for(auto &route : this->routes){
+    cost = 0;
+    for(auto &client : route){
+      cost += this->s->demands_per_client[client];
+    }
+    std::cout << cost << ", ";
+  }
+  std::cout << "]\n";
 }
 
 void Solution::vnd()
 {
-  unsigned int iteration = 0, limit = 20000;
+  unsigned int iteration = 0;
   //third moviment
   while (true)
   {
@@ -193,37 +220,45 @@ void Solution::vnd()
       //first moviment
       while (true)
       {
-        std::cout << "1 NEIGHBORHOOD - " << ++iteration << "\n";
+        //std::cout << "-----------------------------------------\n";
+        //std::cout << "1 NEIGHBORHOOD - " << ++iteration << "\n";
         bool improved = firstMoviment();
-
-        
-        print_routes();
-        if(iteration >= limit) return;
+        //print_state();
+        //print_real_state();
 
         if (!improved)
           break;
       }
 
-      std::cout << "2 NEIGHBORHOOD - " << ++iteration << "\n";
+      //std::cout << "-----------------------------------------\n";
+      //std::cout << "2 NEIGHBORHOOD - " << ++iteration << "\n";
       bool improved = secondMoviment();
-
-      
-      print_routes();
-      if(iteration >= limit) return;
+      //print_state();
+      //print_real_state();
 
       if (!improved)
           break;
     }
-
-    std::cout << "3 NEIGHBORHOOD - " << ++iteration << "\n";
+    //std::cout << "-----------------------------------------\n";
+    //std::cout << "3 NEIGHBORHOOD - " << ++iteration << "\n";
     bool improved = thirdMoviment();
-    
-    print_routes();
-    if(iteration >= limit) return;
+    //print_state();
+    //print_real_state();
 
     if (!improved)
         break;
   }
+
+
+  std::cout << "Final cost: " << this->fitness << "\n";
+  std::cout << "Final routes:\n";
+  for(auto &route : this->routes){
+    for(auto &client : route){
+      std::cout << client << " ";
+    }
+    std::cout << "\n";
+  }
+
 }
 
 bool Solution::firstMoviment()
@@ -405,7 +440,7 @@ bool Solution::secondMoviment() {
 }
 
 bool Solution::thirdMoviment() {
-  return swap_best_block_neighbor(4);
+  return swap_best_block_neighbor(3);
 }
 
 void print_block(const deque<unsigned int> &block){
@@ -457,7 +492,7 @@ bool Solution::swap_best_block_neighbor(short int block_size){
                     capacity_to_block += this->s->demands_per_client[*to_client];
                     to_client++;
                 }
-                unsigned int to_next_client = *from_client;
+                unsigned int to_next_client = *to_client;
 
                 while (to_client != this->routes[to_route].end()) {
                     //cout << "\tSecond block = "; print_block(to_block); cout << "\n";
@@ -475,7 +510,7 @@ bool Solution::swap_best_block_neighbor(short int block_size){
                                     + this->s->distances_between_clients[to_block.back()][from_next_client];
 
                     // Found a smaller cost after swaping blocks, save the route's and the block's indexes
-                    if (current_cost <=  best_total_cost){
+                    if (current_cost <  best_total_cost){
                         // But first make sure that the capacity are compatible with the route
                         if((this->route_demands[from_route] - capacity_from_block + capacity_to_block <= this->s->max_capacity) 
                             && (this->route_demands[to_route] - capacity_to_block + capacity_from_block <= this->s->max_capacity)){
@@ -520,7 +555,7 @@ bool Solution::swap_best_block_neighbor(short int block_size){
         }
         from_block.clear();
     }
-
+    /*
     std::cout << "Best neighbor cost is " << best_total_cost << "\n";
     std::cout << "Swaping [ ";
     short int i = 0;
@@ -534,10 +569,9 @@ bool Solution::swap_best_block_neighbor(short int block_size){
     while (i++ <= block_size){
         std::cout << routes[final_to_route][start_index_to + i] << " ";
     }
-    std::cout << "] from route " << final_to_route << "\n";
-
-    // If found a better neighbor update values
-    if (best_total_cost <= this->fitness){
+    std::cout << "] from route " << final_to_route << "\n";*/
+    // If found a better cost update values
+    if (best_total_cost < this->fitness){
       
       // Updating best cost
       this->fitness = best_total_cost;
