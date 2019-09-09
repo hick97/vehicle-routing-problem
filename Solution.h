@@ -7,7 +7,12 @@ struct Solution
 {
   Scenary *s;
   unsigned int fitness;
+  vector<unsigned int> route_demands;
+  vector<vector<unsigned int>> routes;
 
   Solution(Scenary *scenary);
-  unsigned int construction();
+  void construction();
+  void vnd();
+  void firstMoviment();
+  pair<int, int> getClientPositionInRoutes(unsigned int value);
 };

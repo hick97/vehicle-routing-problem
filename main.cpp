@@ -80,5 +80,6 @@ int main()
         Solution solution(&scenary);
 
         solution.construction();
+        solution.firstMoviment();
     }
 }
