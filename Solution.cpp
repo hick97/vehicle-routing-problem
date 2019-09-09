@@ -6,6 +6,7 @@
 #include <iostream>
 #include <fstream>
 #include <vector>
+#include <deque>
 
 Solution::Solution(Scenary *scenary) : fitness(0), s(scenary), route_demands(scenary->vehicles_number, 0), routes(scenary->vehicles_number)
 {
@@ -360,4 +361,118 @@ pair<int, int> Solution::getClientPositionInRoutes(unsigned int value)
       }
     }
   }
+}
+
+void print_block(const deque<unsigned int> &block){
+    for (auto value : block) {
+        cout << value << " ";
+    }
+}
+
+bool Solution::swap_best_block_neighbor(short int block_size){
+    // Save the best total cost
+    unsigned int best_total_cost = std::numeric_limits<unsigned int>::max();
+    unsigned int final_from_route, final_to_route, start_index_from, start_index_to; 
+    
+    deque<unsigned int> from_block, to_block;
+    unsigned int current_cost;
+
+    for (unsigned int from_route = 0; from_route < this->routes.size(); from_route++) {
+        cout << "NEW ROUTE\n";
+
+        // Make the first block in this route
+        unsigned int from_previous_client = 0;
+        auto from_client = next(this->routes[from_route].begin(), 1);
+        unsigned int begin_from_block_index = 0, capacity_from_block = 0;
+        while (from_client != this->routes[from_route].end() && from_block.size() <= block_size) {
+            from_block.push_back(*from_client);
+            capacity_from_block += this->s->demands_per_client[*from_client];
+            from_client++;
+        }
+        unsigned int from_next_client = *from_client;
+
+        // Now lets compare the cost of swaping this block with blocks from other routes
+        while (from_client != this->routes[from_route].end()) {
+            cout << "First block = "; print_block(from_block); cout << "\n";
+            cout << "Capacity is " << capacity_from_block << "\n";
+
+            for (unsigned int to_route = 0; to_route < this->routes.size(); to_route++) {
+                if (from_route == to_route){
+                    // Trying swap block between the same routes
+                    continue;
+                }
+
+                // Make the first block with this route intended to swap with the other block previously made
+                unsigned int to_previous_client = 0;
+                auto to_client = next(this->routes[to_route].begin(), 1);
+                unsigned int begin_to_block_index = 0, capacity_to_block = 0;
+                while (to_client != this->routes[to_route].end() && to_block.size() <= block_size) {
+                    to_block.push_back(*to_client);
+                    capacity_to_block += this->s->demands_per_client[*to_client];
+                    //to_previous_client = *to_client;
+                    to_client++;
+                }
+                unsigned int to_next_client = *from_client;
+
+                while (to_client != this->routes[to_route].end()) {
+                    cout << "\tSecond block = "; print_block(to_block); cout << "\n";
+                    cout << "\tCapacity is " << capacity_to_block << "\n";
+                    
+                    // Calculate the route cost after swaping these two blocks
+                    current_cost = this->fitness 
+                                    - this->s->distances_between_clients[from_previous_client][from_block.front()]  
+                                    + this->s->distances_between_clients[from_previous_client][to_block.front()]
+                                    - this->s->distances_between_clients[from_block.back()][from_next_client]
+                                    + this->s->distances_between_clients[from_block.back()][to_next_client]
+                                    - this->s->distances_between_clients[to_previous_client][to_block.front()]
+                                    + this->s->distances_between_clients[to_previous_client][from_block.front()]
+                                    - this->s->distances_between_clients[to_block.back()][to_next_client]
+                                    + this->s->distances_between_clients[to_block.back()][from_next_client];
+
+                    // Found a smaller cost after swaping blocks, save the route's and the block's indexes
+                    if (current_cost <=  best_total_cost){
+                        // But first make sure that the capacity are compatible with the route
+                        if((this->route_demands[from_route] - capacity_from_block + capacity_to_block <= this->s->max_capacity) 
+                            && (this->route_demands[to_route] - capacity_to_block + capacity_from_block <= this->s->max_capacity)){
+                                // cout << "\tFOUND BETTER COST " << current_cost << " " << "\n";
+                                best_total_cost = current_cost;
+                                final_from_route = from_route;
+                                final_to_route = to_route;
+                                start_index_from = begin_from_block_index;
+                                start_index_to = begin_to_block_index;
+                            }
+                    }
+
+                    // Advance the second block as a sliding window
+                    to_previous_client = to_block.front();
+                    to_block.pop_front();
+                    capacity_to_block -= this->s->demands_per_client[to_previous_client];
+                    begin_to_block_index++;
+
+                    capacity_to_block += this->s->demands_per_client[*to_client];
+                    to_block.push_back(*to_client);
+                    to_client++;
+                    to_next_client = *to_client;
+                }
+
+                // Tested the swap with all blocks from this route, 
+                // clear the data structure to start testing other route
+                to_block.clear();
+            }
+
+            // Advance the first block as a sliding window
+            from_previous_client = from_block.front();
+            from_block.pop_front();
+            capacity_from_block -= this->s->demands_per_client[from_previous_client];
+            begin_from_block_index++;
+
+            from_block.push_back(*from_client);
+            capacity_from_block += this->s->demands_per_client[*from_client];
+            from_client++;
+            from_next_client = *from_client;
+        }
+        from_block.clear();
+    }
+
+    return best_total_cost <= this->fitness;
 }
