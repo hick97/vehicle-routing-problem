@@ -13,6 +13,7 @@ struct Solution
   Solution(Scenary *scenary);
   void construction();
   void vnd();
+  void print_routes();
   bool firstMoviment();
   bool secondMoviment();
   bool thirdMoviment();

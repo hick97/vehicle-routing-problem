@@ -166,8 +166,22 @@ void Solution::construction()
   cout << "\n";
   */
 }
+
+
+void Solution::print_routes(){
+  std::cout << "Current cost = " << this->fitness << "\n";
+
+  for(auto &route : this->routes){
+    for(auto &client : route){
+      std::cout << client << " ";
+    }
+    std::cout << "\n";
+  }
+}
+
 void Solution::vnd()
 {
+  unsigned int iteration = 0, limit = 20000;
   //third moviment
   while (true)
   {
@@ -179,34 +193,36 @@ void Solution::vnd()
       //first moviment
       while (true)
       {
-
-        //TODO: call moviment
+        std::cout << "1 NEIGHBORHOOD - " << ++iteration << "\n";
         bool improved = firstMoviment();
+
+        
+        print_routes();
+        if(iteration >= limit) return;
 
         if (!improved)
           break;
-
-        //TODO: comparing moviment result with global result
-        //TODO: if improved, global = moviment result, if dont improved break;
       }
 
-      //TODO: call moviment
+      std::cout << "2 NEIGHBORHOOD - " << ++iteration << "\n";
       bool improved = secondMoviment();
+
+      
+      print_routes();
+      if(iteration >= limit) return;
 
       if (!improved)
           break;
-
-      //TODO: comparing moviment result with global result
-      //TODO: if improved, global = moviment result, if dont improved break;
     }
-    //TODO: call moviment
 
+    std::cout << "3 NEIGHBORHOOD - " << ++iteration << "\n";
     bool improved = thirdMoviment();
+    
+    print_routes();
+    if(iteration >= limit) return;
 
     if (!improved)
         break;
-    //TODO: comparing moviment result with global result
-    //TODO: if improved, global = moviment result, if dont improved break;
   }
 }
 
@@ -327,6 +343,7 @@ bool Solution::firstMoviment()
     candidates.erase(candidates.begin() + random_index);
   }
 
+  /*
   printf("Final cost after moviment: %d\n", this->fitness);
 
   // Printando rotas:
@@ -342,6 +359,7 @@ bool Solution::firstMoviment()
   }
 
   cout << "\n";
+  */
 
   return improved;
 
@@ -406,7 +424,7 @@ bool Solution::swap_best_block_neighbor(short int block_size){
     unsigned int current_cost;
 
     for (unsigned int from_route = 0; from_route < this->routes.size(); from_route++) {
-        cout << "NEW ROUTE\n";
+        //cout << "NEW ROUTE\n";
 
         // Make the first block in this route
         unsigned int from_previous_client = 0;
@@ -421,8 +439,8 @@ bool Solution::swap_best_block_neighbor(short int block_size){
 
         // Now lets compare the cost of swaping this block with blocks from other routes
         while (from_client != this->routes[from_route].end()) {
-            cout << "First block = "; print_block(from_block); cout << "\n";
-            cout << "Capacity is " << capacity_from_block << "\n";
+            //cout << "First block = "; print_block(from_block); cout << "\n";
+            //cout << "Capacity is " << capacity_from_block << "\n";
 
             for (unsigned int to_route = 0; to_route < this->routes.size(); to_route++) {
                 if (from_route == to_route){
@@ -437,14 +455,13 @@ bool Solution::swap_best_block_neighbor(short int block_size){
                 while (to_client != this->routes[to_route].end() && to_block.size() <= block_size) {
                     to_block.push_back(*to_client);
                     capacity_to_block += this->s->demands_per_client[*to_client];
-                    //to_previous_client = *to_client;
                     to_client++;
                 }
                 unsigned int to_next_client = *from_client;
 
                 while (to_client != this->routes[to_route].end()) {
-                    cout << "\tSecond block = "; print_block(to_block); cout << "\n";
-                    cout << "\tCapacity is " << capacity_to_block << "\n";
+                    //cout << "\tSecond block = "; print_block(to_block); cout << "\n";
+                    //cout << "\tCapacity is " << capacity_to_block << "\n";
                     
                     // Calculate the route cost after swaping these two blocks
                     current_cost = this->fitness 
@@ -504,13 +521,30 @@ bool Solution::swap_best_block_neighbor(short int block_size){
         from_block.clear();
     }
 
+    std::cout << "Best neighbor cost is " << best_total_cost << "\n";
+    std::cout << "Swaping [ ";
+    short int i = 0;
+    while (i++ <= block_size){
+        std::cout << this->routes[final_from_route][start_index_from + i] << " ";
+    }
+    std::cout << "] from route " << final_from_route;
+
+    std::cout << " with [ ";
+    i = 0;
+    while (i++ <= block_size){
+        std::cout << routes[final_to_route][start_index_to + i] << " ";
+    }
+    std::cout << "] from route " << final_to_route << "\n";
+
     // If found a better neighbor update values
     if (best_total_cost <= this->fitness){
+      
       // Updating best cost
       this->fitness = best_total_cost;
 
       // Swaping block
-      for (short int i = 0; i <= block_size; i++) {
+      short int i = 0;
+      while (i++ <= block_size){
         swap(
           this->routes[final_from_route][start_index_from + i],
           this->routes[final_to_route][start_index_to + i]
