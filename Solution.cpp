@@ -181,28 +181,35 @@ void Solution::vnd()
       {
 
         //TODO: call moviment
-        /*
         bool improved = firstMoviment();
 
         if (!improved)
           break;
-        */
 
         //TODO: comparing moviment result with global result
         //TODO: if improved, global = moviment result, if dont improved break;
       }
 
       //TODO: call moviment
+      bool improved = secondMoviment();
+
+      if (!improved)
+          break;
 
       //TODO: comparing moviment result with global result
       //TODO: if improved, global = moviment result, if dont improved break;
     }
     //TODO: call moviment
 
+    bool improved = thirdMoviment();
+
+    if (!improved)
+        break;
     //TODO: comparing moviment result with global result
     //TODO: if improved, global = moviment result, if dont improved break;
   }
 }
+
 bool Solution::firstMoviment()
 {
   bool improved = false;
@@ -375,6 +382,14 @@ pair<int, int> Solution::getClientPositionInRoutes(unsigned int value)
   }
 }
 
+bool Solution::secondMoviment() {
+  return swap_best_block_neighbor(0);
+}
+
+bool Solution::thirdMoviment() {
+  return swap_best_block_neighbor(4);
+}
+
 void print_block(const deque<unsigned int> &block){
     for (auto value : block) {
         cout << value << " ";
@@ -384,7 +399,8 @@ void print_block(const deque<unsigned int> &block){
 bool Solution::swap_best_block_neighbor(short int block_size){
     // Save the best total cost
     unsigned int best_total_cost = std::numeric_limits<unsigned int>::max();
-    unsigned int final_from_route, final_to_route, start_index_from, start_index_to; 
+    unsigned int final_from_route, final_to_route, start_index_from, start_index_to, 
+                  final_from_capacity, final_to_capacity; 
     
     deque<unsigned int> from_block, to_block;
     unsigned int current_cost;
@@ -452,6 +468,8 @@ bool Solution::swap_best_block_neighbor(short int block_size){
                                 final_to_route = to_route;
                                 start_index_from = begin_from_block_index;
                                 start_index_to = begin_to_block_index;
+                                final_from_capacity = capacity_from_block;
+                                final_to_capacity = capacity_to_block;
                             }
                     }
 
@@ -486,5 +504,26 @@ bool Solution::swap_best_block_neighbor(short int block_size){
         from_block.clear();
     }
 
-    return best_total_cost <= this->fitness;
+    // If found a better neighbor update values
+    if (best_total_cost <= this->fitness){
+      // Updating best cost
+      this->fitness = best_total_cost;
+
+      // Swaping block
+      for (short int i = 0; i <= block_size; i++) {
+        swap(
+          this->routes[final_from_route][start_index_from + i],
+          this->routes[final_to_route][start_index_to + i]
+        );
+      }
+
+      // Updating route demands
+      this->route_demands[final_from_route] = this->route_demands[final_from_route] - final_from_capacity + final_to_capacity;
+      this->route_demands[final_to_route] = this->route_demands[final_to_route] - final_to_capacity + final_from_capacity;
+
+      return true;
+    }
+
+
+    return false;
 }

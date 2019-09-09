@@ -14,6 +14,8 @@ struct Solution
   void construction();
   void vnd();
   bool firstMoviment();
+  bool secondMoviment();
+  bool thirdMoviment();
   pair<int, int> getClientPositionInRoutes(unsigned int value);
   bool swap_best_block_neighbor(short int block_size);
 };
