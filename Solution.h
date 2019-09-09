@@ -13,6 +13,6 @@ struct Solution
   Solution(Scenary *scenary);
   void construction();
   void vnd();
-  void firstMoviment();
+  bool firstMoviment();
   pair<int, int> getClientPositionInRoutes(unsigned int value);
 };
