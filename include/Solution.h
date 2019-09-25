@@ -14,6 +14,7 @@ struct Solution
   Solution(Solution &sol);
   void construction();
   void vnd();
+  void vns();
   void print_state();
   void print_real_state();
   bool firstMoviment();
