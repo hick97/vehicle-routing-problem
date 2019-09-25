@@ -81,8 +81,8 @@ int main()
         Solution solution(&scenary);
 
         solution.construction();
-        solution.vnd();
-        solution.swapping_random_nodes(solution);
+        //solution.vnd();
+        solution.swapping_nodes_between_routes(solution);
 
         //solution.firstMoviment();
     }

@@ -639,50 +639,143 @@ Solution Solution::swapping_random_nodes(Solution &sol)
   cout << "Com o elemento: " << second_element << "\n";
   */
 
-  //Updating routes
+  // Updating routes
   swap(
       solCopy.routes[random_route][first_pos],
       solCopy.routes[random_route][second_pos]);
+
+  unsigned int next_value = -1;
+  unsigned int previous_value = -1;
+
+  // Updating cost after swap
+  next_value = this->routes[random_route][second_pos + 1];
+  previous_value = this->routes[random_route][second_pos - 1];
+
+  solCopy.fitness +=
+      (solCopy.s->distances_between_clients[previous_value][first_element] +
+       solCopy.s->distances_between_clients[next_value][first_element]) -
+      (solCopy.s->distances_between_clients[previous_value][second_element] +
+       solCopy.s->distances_between_clients[second_element][next_value]);
+
+  next_value = this->routes[random_route][first_pos + 1];
+  previous_value = this->routes[random_route][first_pos - 1];
+  solCopy.fitness +=
+      (solCopy.s->distances_between_clients[previous_value][second_element] +
+       solCopy.s->distances_between_clients[next_value][second_element]) -
+      (solCopy.s->distances_between_clients[previous_value][first_element] +
+       solCopy.s->distances_between_clients[first_element][next_value]);
+
+  return solCopy;
+}
+
+Solution Solution::swapping_nodes_between_routes(Solution &sol)
+{
+  // Copying current solution
+  Solution solCopy(sol);
+
+  //Choosing random routes to swap nodes
+  int first_random_route = -1;
+  int second_random_route = -1;
+
+  first_random_route = rand() % (solCopy.routes.size());
+  second_random_route = rand() % (solCopy.routes.size());
+
+  // Choosing one position in each route
+  int first_pos = rand() % (solCopy.routes[first_random_route].size() - 2) + 1;
+  int second_pos = rand() % (solCopy.routes[second_random_route].size() - 2) + 1;
+
+  // Getting elements
+  unsigned int first_element = solCopy.routes[first_random_route][first_pos];
+  unsigned int second_element = solCopy.routes[second_random_route][second_pos];
+
+  bool reload_choice = true;
+
+  // Checking capacities after changes
+  while (
+      (solCopy.route_demands[first_random_route] +
+           this->s->demands_per_client[second_element] -
+           this->s->demands_per_client[first_element] >
+       this->s->max_capacity) ||
+      (solCopy.route_demands[second_random_route] +
+           this->s->demands_per_client[first_element] -
+           this->s->demands_per_client[second_element] >
+       this->s->max_capacity))
+  {
+    // Choosing one position in each route
+    first_pos = rand() % (solCopy.routes[first_random_route].size() - 2) + 1;
+    second_pos = rand() % (solCopy.routes[second_random_route].size() - 2) + 1;
+
+    // Getting elements
+    first_element = solCopy.routes[first_random_route][first_pos];
+    second_element = solCopy.routes[second_random_route][second_pos];
+  }
+
+  unsigned int next_value = -1;
+  unsigned int previous_value = -1;
+
+  // Updating routes
+  swap(
+      solCopy.routes[first_random_route][first_pos],
+      solCopy.routes[second_random_route][second_pos]);
+
+  // Updating cost
+
+  // Udating cost in second route
+  next_value = this->routes[second_random_route][second_pos + 1];
+  previous_value = this->routes[second_random_route][second_pos - 1];
+
+  solCopy.fitness +=
+      (solCopy.s->distances_between_clients[previous_value][first_element] +
+       solCopy.s->distances_between_clients[next_value][first_element]) -
+      (solCopy.s->distances_between_clients[previous_value][second_element] +
+       solCopy.s->distances_between_clients[second_element][next_value]);
+
+  // Updating cost in first route
+  next_value = this->routes[first_random_route][first_pos + 1];
+  previous_value = this->routes[first_random_route][first_pos - 1];
+
+  solCopy.fitness +=
+      (solCopy.s->distances_between_clients[previous_value][second_element] +
+       solCopy.s->distances_between_clients[next_value][second_element]) -
+      (solCopy.s->distances_between_clients[previous_value][first_element] +
+       solCopy.s->distances_between_clients[first_element][next_value]);
+
+  // Updating demands
+
+  // Updating demand in second random route
+  solCopy.route_demands[second_random_route] +=
+      solCopy.s->demands_per_client[first_element] -
+      solCopy.s->demands_per_client[second_element];
+
+  // Updating demand in second random route
+  solCopy.route_demands[first_random_route] +=
+      solCopy.s->demands_per_client[second_element] -
+      solCopy.s->demands_per_client[first_element];
   /*
+  unsigned int cost = 0;
   for (auto &route : solCopy.routes)
   {
-    std::cout << "[";
+    for (unsigned int c = 1; c < route.size(); c++)
+    {
+      cost += solCopy.s->distances_between_clients[route[c - 1]][route[c]];
+    }
+  }
+  std::cout << "Real cost should be = " << cost << "\n";
+
+  std::cout << "Real demands should be = [";
+  for (auto &route : this->routes)
+  {
+    cost = 0;
     for (auto &client : route)
     {
-      std::cout << client << ", ";
+      cost += solCopy.s->demands_per_client[client];
     }
-    std::cout << "],\n";
+    std::cout << cost << ", ";
   }
+  std::cout << "]\n";
+
+  cout << "\nnew fitness: " << solCopy.fitness << "\n";
   */
 
   return solCopy;
 }
-/*
-Solution *Solution::swapping_nodes_between_routes()
-{
-  bool reload_choice = true;
-
-  while (reload_choice)
-  {
-    first_element = solCopy.routes[random_route][rand() % (solCopy.routes[random_route].size())];
-    second_element = solCopy.routes[random_route][rand() % (solCopy.routes[random_route].size())];
-
-    // Checking capacity
-    if (first_pos != second_pos)
-    {
-      if (solCopy.route_demands[random_route] +
-              this->s->demands_per_client[first_element] -
-              this->s->demands_per_client[second_element] <=
-          this->s->max_capacity)
-      {
-        if (solCopy.route_demands[random_route] +
-                this->s->demands_per_client[first_element] -
-                this->s->demands_per_client[second_element] <=
-            this->s->max_capacity)
-        {
-        }
-      }
-    }
-  }
-}
-*/
