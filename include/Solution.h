@@ -11,6 +11,7 @@ struct Solution
   vector<vector<unsigned int>> routes;
 
   Solution(Scenary *scenary);
+  Solution(Solution &sol);
   void construction();
   void vnd();
   void print_state();
@@ -20,4 +21,6 @@ struct Solution
   bool thirdMoviment();
   pair<int, int> getClientPositionInRoutes(unsigned int value);
   bool swap_best_block_neighbor(short int block_size);
+  Solution swapping_random_nodes(Solution &sol);
+  Solution *swapping_nodes_between_routes();
 };

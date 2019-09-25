@@ -8,13 +8,14 @@ using namespace std;
 int main()
 {
     string file_names[] = {
-        "data/P-n19-k2.txt"/*,
+        "data/P-n19-k2.txt" /*,
         "data/P-n45-k5.txt",
         "data/P-n55-k7.txt",
         "data/P-n20-k2.txt",
         "data/P-n50-k10.txt",
         "data/P-n23-k8.txt",
-        "data/P-n51-k10.txt"*/};
+        "data/P-n51-k10.txt"*/
+    };
 
     for (auto &file_name : file_names)
     {
@@ -81,6 +82,8 @@ int main()
 
         solution.construction();
         solution.vnd();
+        solution.swapping_random_nodes(solution);
+
         //solution.firstMoviment();
     }
 }
