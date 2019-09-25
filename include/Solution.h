@@ -23,5 +23,5 @@ struct Solution
   pair<int, int> getClientPositionInRoutes(unsigned int value);
   bool swap_best_block_neighbor(unsigned int block_size);
   void swapping_random_nodes();
-  Solution *swapping_nodes_between_routes();
+  void swapping_nodes_between_routes();
 };
