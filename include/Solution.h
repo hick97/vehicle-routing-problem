@@ -14,14 +14,14 @@ struct Solution
   Solution(Solution &sol);
   void construction();
   void vnd();
-  void vns();
+  void vns(unsigned int iteration_limit);
   void print_state();
   void print_real_state();
   bool firstMoviment();
   bool secondMoviment();
   bool thirdMoviment();
   pair<int, int> getClientPositionInRoutes(unsigned int value);
-  bool swap_best_block_neighbor(short int block_size);
-  Solution swapping_random_nodes(Solution &sol);
+  bool swap_best_block_neighbor(unsigned int block_size);
+  void swapping_random_nodes();
   Solution *swapping_nodes_between_routes();
 };
