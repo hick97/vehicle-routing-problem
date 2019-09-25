@@ -80,7 +80,7 @@ int main()
         Solution solution(&scenary);
 
         solution.construction();
-        solution.vnd();
+        solution.vnd(this);
         //solution.firstMoviment();
     }
 }

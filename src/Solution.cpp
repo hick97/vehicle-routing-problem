@@ -166,8 +166,6 @@ void Solution::construction()
   cout << "\n";
   */
 }
-
-
 void Solution::print_state(){
   std::cout << "Current cost = " << this->fitness << "\nRoutes = \n";
 
@@ -208,7 +206,6 @@ void Solution::print_real_state(){
 
 void Solution::vnd()
 {
-  unsigned int iteration = 0;
   //third moviment
   while (true)
   {
@@ -250,8 +247,8 @@ void Solution::vnd()
   }
 
 
-  std::cout << "Final cost: " << this->fitness << "\n";
-  std::cout << "Final routes:\n";
+  std::cout << "VND cost: " << this->fitness << "\n";
+  std::cout << "VND routes:\n";
   for(auto &route : this->routes){
     for(auto &client : route){
       std::cout << client << " ";
@@ -259,6 +256,46 @@ void Solution::vnd()
     std::cout << "\n";
   }
 
+}
+void Solution::vns(unsigned int iteration_limit){
+  Sollution cur_sollution = this;
+  unsigned int max_neighborhood = 3;
+
+  while (iteration_limit--){
+    cur_neighborhood = 1;
+
+    while (cur_neighborhood <= max_neighborhood) {
+      Solution neighbor;
+
+      switch (cur_neighborhood) {
+        case 1: 
+          neighbor = swap_random_nodes(cur_sollution); break;
+        case 2: 
+          neighbor = swap_nodes_between_routes(cur_sollution); break;
+        case 3: 
+          neighbor=  break;
+      }
+
+      neighbor.vnd();
+
+      if (neighbor->fitness <= cur_sollution->fitness){
+        cur_sollution = best_neighbor;
+        cur_neighborhood = 1;
+      } else {
+        cur_neighborhood++;
+      } 
+    }
+  }
+
+
+  std::cout << "Final cost: " << cur_sollution->fitness << "\n";
+  std::cout << "Final routes:\n";
+  for(auto &route : cur_sollution->routes){
+    for(auto &client : route){
+      std::cout << client << " ";
+    }
+    std::cout << "\n";
+  }
 }
 
 bool Solution::firstMoviment()
@@ -417,6 +454,7 @@ bool Solution::firstMoviment()
   cout << "\n";
   */
 }
+
 pair<int, int> Solution::getClientPositionInRoutes(unsigned int value)
 {
   std::pair<int, int> positions;
