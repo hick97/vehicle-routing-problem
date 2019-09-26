@@ -136,7 +136,9 @@ void Solution::construction()
     //Removing cadidate from list
     candidates.erase(candidates.begin() + random_index);
   }
+ // std::cout << this->fitness << ", ";
 
+  
   printf("Constructed route cost: %d\n", this->fitness);
 
   // Printando rotas:
@@ -151,8 +153,10 @@ void Solution::construction()
     cout << "\n";
   }
 
-  // Printando rotas:
+  //this->print_state();
+  //this->print_real_state();
   /*
+  // Printando rotas:
   printf("Final demands: %u\n", this->s->max_capacity);
   auto sum = 0;
 
@@ -173,6 +177,7 @@ void Solution::construction()
 
 void Solution::print_state()
 {
+  std::cout << "=================================\n";
   std::cout << "Current cost = " << this->fitness << "\nRoutes = \n";
 
   for (auto &route : this->routes)
@@ -195,7 +200,8 @@ void Solution::print_state()
 
 void Solution::print_real_state()
 {
-  unsigned int cost = 0;
+  std::cout << "=================================\n";
+  unsigned long long cost = 0;
   for (auto &route : this->routes)
   {
     for (unsigned int c = 1; c < route.size(); c++)
@@ -290,18 +296,35 @@ void Solution::vns(unsigned int iteration_limit){
           neighbor.swapping_nodes_between_routes(); break;
       }
 
+      std::cout << "Vizinho antes VND vizinhança " << cur_neighborhood;
+      neighbor.print_state();
+      neighbor.print_real_state();
+
+
       neighbor.vnd();
+
+      std::cout << "Vizinho depois VND vizinhança " << cur_neighborhood;
+      neighbor.print_state();
+      neighbor.print_real_state();
+
 
       if (neighbor.fitness <= cur_solution.fitness){
         cur_solution = neighbor;
         cur_neighborhood = 1;
       } else {
         cur_neighborhood++;
-      } 
+      }
+
+      cur_solution.print_state();
+      cur_solution.print_real_state();
     }
   }
-
-
+  std::cout << "Solução final \n";
+  std::cout << cur_solution.fitness << ", ";
+  cur_solution.print_state();
+  cur_solution.print_real_state();
+  
+  /*
   std::cout << "Final cost: " << cur_solution.fitness << "\n";
   std::cout << "Final routes:\n";
   for(auto &route : cur_solution.routes){
@@ -311,7 +334,7 @@ void Solution::vns(unsigned int iteration_limit){
     std::cout << "\n";
   }
 
-  cur_solution.print_real_state();
+  cur_solution.print_real_state(); */
 }
 
 
@@ -539,14 +562,8 @@ bool Solution::swap_best_block_neighbor(unsigned int block_size)
       //cout << "First block = "; print_block(from_block); cout << "\n";
       //cout << "Capacity is " << capacity_from_block << "\n";
 
-      for (unsigned int to_route = 0; to_route < this->routes.size(); to_route++)
+      for (unsigned int to_route = from_route+1; to_route < this->routes.size(); to_route++)
       {
-        if (from_route == to_route)
-        {
-          // Trying swap block between the same routes
-          continue;
-        }
-
         // Make the first block with this route intended to swap with the other block previously made
         unsigned int to_previous_client = 0;
         auto to_client = next(this->routes[to_route].begin(), 1);
@@ -565,7 +582,15 @@ bool Solution::swap_best_block_neighbor(unsigned int block_size)
           //cout << "\tCapacity is " << capacity_to_block << "\n";
 
           // Calculate the route cost after swaping these two blocks
-          current_cost = this->fitness - this->s->distances_between_clients[from_previous_client][from_block.front()] + this->s->distances_between_clients[from_previous_client][to_block.front()] - this->s->distances_between_clients[from_block.back()][from_next_client] + this->s->distances_between_clients[from_block.back()][to_next_client] - this->s->distances_between_clients[to_previous_client][to_block.front()] + this->s->distances_between_clients[to_previous_client][from_block.front()] - this->s->distances_between_clients[to_block.back()][to_next_client] + this->s->distances_between_clients[to_block.back()][from_next_client];
+          current_cost = this->fitness 
+                        - this->s->distances_between_clients[from_previous_client][from_block.front()] 
+                        + this->s->distances_between_clients[from_previous_client][to_block.front()] 
+                        - this->s->distances_between_clients[from_block.back()][from_next_client] 
+                        + this->s->distances_between_clients[from_block.back()][to_next_client] 
+                        - this->s->distances_between_clients[to_previous_client][to_block.front()] 
+                        + this->s->distances_between_clients[to_previous_client][from_block.front()] 
+                        - this->s->distances_between_clients[to_block.back()][to_next_client] 
+                        + this->s->distances_between_clients[to_block.back()][from_next_client];
 
           // Found a smaller cost after swaping blocks, save the route's and the block's indexes
           if (current_cost < best_total_cost)
@@ -657,8 +682,7 @@ bool Solution::swap_best_block_neighbor(unsigned int block_size)
 
 // Disturbances
 
-void Solution::swapping_random_nodes()
-{
+void Solution::swapping_random_nodes() {
 
   // Copying current solution
   //Solution solCopy(sol);
@@ -671,6 +695,11 @@ void Solution::swapping_random_nodes()
   int first_pos = rand() % (this->routes[random_route].size() - 2) + 1;
   int second_pos = rand() % (this->routes[random_route].size() - 2) + 1;
 
+  // Avoid choosing consecutive nodes
+  while (second_pos == first_pos+1 || second_pos == first_pos-1){
+    second_pos = rand() % (this->routes[random_route].size() - 2) + 1;
+  }
+
   // Getting elements
   unsigned int first_element = this->routes[random_route][first_pos];
   unsigned int second_element = this->routes[random_route][second_pos];
@@ -681,17 +710,25 @@ void Solution::swapping_random_nodes()
   cout << "Com o elemento: " << second_element << "\n";
   */
 
-  // Updating routes
-  swap(
-      this->routes[random_route][first_pos],
-      this->routes[random_route][second_pos]);
+  unsigned int previous_client_first = this->routes[random_route][first_pos - 1];
+  unsigned int next_client_first = this->routes[random_route][first_pos + 1];
+  unsigned int previous_client_second = this->routes[random_route][second_pos - 1];
+  unsigned int next_client_second = this->routes[random_route][second_pos + 1];
 
-  unsigned int next_value = -1;
-  unsigned int previous_value = -1;
-
+  this->fitness = this->fitness 
+                    - this->s->distances_between_clients[previous_client_first][first_element] 
+                    + this->s->distances_between_clients[previous_client_second][first_element] 
+                    - this->s->distances_between_clients[next_client_first][first_element] 
+                    + this->s->distances_between_clients[next_client_second][first_element] 
+                    - this->s->distances_between_clients[previous_client_second][second_element] 
+                    + this->s->distances_between_clients[previous_client_first][second_element] 
+                    - this->s->distances_between_clients[next_client_second][second_element] 
+                    + this->s->distances_between_clients[next_client_first][second_element];
+  
+  /*
   // Updating cost after swap
-  next_value = this->routes[random_route][second_pos + 1];
-  previous_value = this->routes[random_route][second_pos - 1];
+  unsigned int next_value = this->routes[random_route][second_pos + 1];
+  unsigned int previous_value = this->routes[random_route][second_pos - 1];
 
   this->fitness +=
       (this->s->distances_between_clients[previous_value][first_element] +
@@ -701,11 +738,19 @@ void Solution::swapping_random_nodes()
 
   next_value = this->routes[random_route][first_pos + 1];
   previous_value = this->routes[random_route][first_pos - 1];
+
   this->fitness +=
       (this->s->distances_between_clients[previous_value][second_element] +
        this->s->distances_between_clients[next_value][second_element]) -
       (this->s->distances_between_clients[previous_value][first_element] +
-       this->s->distances_between_clients[first_element][next_value]);
+       this->s->distances_between_clients[first_element][next_value]); 
+  */
+
+  // Updating routes
+  swap(
+      this->routes[random_route][first_pos],
+      this->routes[random_route][second_pos]
+    );
 
 }
 
@@ -719,6 +764,11 @@ void Solution::swapping_nodes_between_routes()
 
   first_random_route = rand() % (this->routes.size());
   second_random_route = rand() % (this->routes.size());
+
+  // Avoid choosing the same route twice
+  while (first_random_route == second_random_route){
+    second_random_route = rand() % (this->routes.size());
+  }
 
   // Choosing one position in each route
   int first_pos = rand() % (this->routes[first_random_route].size() - 2) + 1;
@@ -753,14 +803,26 @@ void Solution::swapping_nodes_between_routes()
   unsigned int next_value = -1;
   unsigned int previous_value = -1;
 
-  // Updating routes
-  swap(
-      this->routes[first_random_route][first_pos],
-      this->routes[second_random_route][second_pos]);
+  /*
+  unsigned int previous_client_first = this->routes[first_random_route][first_pos - 1];
+  unsigned int next_client_first = this->routes[first_random_route][first_pos + 1];
+  unsigned int previous_client_second = this->routes[second_random_route][second_pos - 1];
+  unsigned int next_client_second = this->routes[second_random_route][second_pos + 1];
 
+  this->fitness = this->fitness 
+                    - this->s->distances_between_clients[previous_client_first][first_element] 
+                    + this->s->distances_between_clients[previous_client_second][first_element] 
+                    - this->s->distances_between_clients[next_client_first][first_element] 
+                    + this->s->distances_between_clients[next_client_second][first_element] 
+                    - this->s->distances_between_clients[previous_client_second][second_element] 
+                    + this->s->distances_between_clients[previous_client_first][second_element] 
+                    - this->s->distances_between_clients[next_client_second][second_element] 
+                    + this->s->distances_between_clients[next_client_first][second_element];
+  */
+  
   // Updating cost
 
-  // Udating cost in second route
+  //Udating cost in second route
   next_value = this->routes[second_random_route][second_pos + 1];
   previous_value = this->routes[second_random_route][second_pos - 1];
 
@@ -791,6 +853,14 @@ void Solution::swapping_nodes_between_routes()
   this->route_demands[first_random_route] +=
       this->s->demands_per_client[second_element] -
       this->s->demands_per_client[first_element];
+
+
+  // Updating routes
+  swap(
+      this->routes[first_random_route][first_pos],
+      this->routes[second_random_route][second_pos]
+      );
+
   /*
   unsigned int cost = 0;
   for (auto &route : solCopy.routes)
