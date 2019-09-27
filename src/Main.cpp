@@ -4,15 +4,16 @@
 #include <fstream>
 #include <string>
 #include <time.h>
+#include <unistd.h>
 using namespace std;
 
 int main() {
     string file_names[] = {
-        //"data/P-n19-k2.txt" ,
-        "data/P-n45-k5.txt"//,
+        //"data/P-n19-k2.txt",
+        //"data/P-n45-k5.txt",
         //"data/P-n55-k7.txt",
         //"data/P-n20-k2.txt",
-        //"data/P-n50-k10.txt",
+        "data/P-n50-k10.txt",
         //"data/P-n23-k8.txt",
         //"data/P-n51-k10.txt"
     };
@@ -94,18 +95,28 @@ int main() {
         // Running construction
         time_t begin, middle, end;
 
-        for(short int i = 0; i < 1; i++){
-            Scenary scenary(clients, vehicles, capacity, demands, distances);
+        Scenary scenary(clients, vehicles, capacity, demands, distances);
+        unsigned int cost_construction, cost_vns; 
+
+        ofstream out_file;
+        out_file.open("statistics.csv");
+        for(short int i = 0; i < 11; i++){
             Solution solution(&scenary);
             begin = time(NULL);
-            solution.construction();
+            cost_construction = solution.construction();
             
             middle = time(NULL);
-            //cout << difftime(middle, begin) << ", ";
+            out_file << cost_construction << ", " << difftime(middle, begin) << ", ";
 
-            solution.vns(100);
+            cost_vns = solution.vns(100);
             end = time(NULL);
-            //cout << difftime(end, middle) << "\n";
+            out_file << cost_vns << ", " << difftime(end, middle)  << "\n";
+
+            // Sleep for 5 seconds
+            usleep(5000000);
         }
+
+        out_file.close();
+       
     }
 }

@@ -12,9 +12,9 @@ struct Solution
 
   Solution(Scenary *scenary);
   Solution(Solution &sol);
-  void construction();
+  unsigned int construction();
   void vnd();
-  void vns(unsigned int iteration_limit);
+  unsigned int vns(unsigned int iteration_limit);
   void print_state();
   void print_real_state();
   bool firstMoviment();

@@ -16,7 +16,7 @@ Solution::Solution(Solution &sol) : fitness(sol.fitness), s(sol.s), route_demand
 {
 }
 
-void Solution::construction()
+unsigned int Solution::construction()
 {
 
   //Starting candidates list
@@ -136,9 +136,11 @@ void Solution::construction()
     //Removing cadidate from list
     candidates.erase(candidates.begin() + random_index);
   }
- // std::cout << this->fitness << ", ";
+  // std::cout << this->fitness << ", ";
 
-  
+  return this->fitness;
+
+  /*
   printf("Constructed route cost: %d\n", this->fitness);
 
   // Printando rotas:
@@ -180,22 +182,33 @@ void Solution::print_state()
   std::cout << "=================================\n";
   std::cout << "Current cost = " << this->fitness << "\nRoutes = \n";
 
-  for (auto &route : this->routes)
-  {
+  for (unsigned int route = 0; route < this->routes.size(); route++){
     std::cout << "[";
-    for (auto &client : route)
-    {
-      std::cout << client << ", ";
+    for (unsigned int client = 0; client < this->routes[route].size(); client++){
+      std::cout <<  this->routes[route][client];
+
+      if (client < this->routes[route].size() - 1){
+        std::cout << ", ";
+      }
     }
-    std::cout << "],\n";
+
+    if (route < this->routes.size() - 1){
+      std::cout << "],\n";
+    } else {
+      std::cout << "]\n";
+    }
   }
 
   std::cout << "Demands = [";
-  for (auto &demand : this->route_demands)
-  {
-    std::cout << demand << ", ";
+  for (unsigned int demand = 0; demand < this->route_demands.size(); demand++){
+    std::cout << this->route_demands[demand];
+
+    if (demand < this->route_demands.size()-1){
+      std::cout << ", ";
+    } else {
+      std::cout << "]\n";
+    }
   }
-  std::cout << "],\n";
 }
 
 void Solution::print_real_state()
@@ -226,6 +239,7 @@ void Solution::print_real_state()
 
 void Solution::vnd()
 {
+  unsigned int iteration = 0;
   //third moviment
   while (true)
   {
@@ -279,7 +293,7 @@ void Solution::vnd()
   }*/
 }
 
-void Solution::vns(unsigned int iteration_limit){
+unsigned int Solution::vns(unsigned int iteration_limit){
   Solution cur_solution = *this;
   unsigned int max_neighborhood = 2;
 
@@ -295,18 +309,17 @@ void Solution::vns(unsigned int iteration_limit){
         case 2: 
           neighbor.swapping_nodes_between_routes(); break;
       }
-
+      /*
       std::cout << "Vizinho antes VND vizinhança " << cur_neighborhood;
       neighbor.print_state();
-      neighbor.print_real_state();
-
+      neighbor.print_real_state();*/
 
       neighbor.vnd();
 
+      /*
       std::cout << "Vizinho depois VND vizinhança " << cur_neighborhood;
       neighbor.print_state();
-      neighbor.print_real_state();
-
+      neighbor.print_real_state();*/
 
       if (neighbor.fitness <= cur_solution.fitness){
         cur_solution = neighbor;
@@ -315,26 +328,15 @@ void Solution::vns(unsigned int iteration_limit){
         cur_neighborhood++;
       }
 
-      cur_solution.print_state();
-      cur_solution.print_real_state();
+      //cur_solution.print_state();
+      //cur_solution.print_real_state();
     }
   }
-  std::cout << "Solução final \n";
-  std::cout << cur_solution.fitness << ", ";
+  //std::cout << "Solução final \n";
+  //std::cout << cur_solution.fitness << ", ";
   cur_solution.print_state();
-  cur_solution.print_real_state();
-  
-  /*
-  std::cout << "Final cost: " << cur_solution.fitness << "\n";
-  std::cout << "Final routes:\n";
-  for(auto &route : cur_solution.routes){
-    for(auto &client : route){
-      std::cout << client << " ";
-    }
-    std::cout << "\n";
-  }
-
-  cur_solution.print_real_state(); */
+  //cur_solution.print_real_state();
+  return cur_solution.fitness;
 }
 
 
@@ -494,6 +496,7 @@ bool Solution::firstMoviment()
   cout << "\n";
   */
 }
+
 pair<int, int> Solution::getClientPositionInRoutes(unsigned int value)
 {
   std::pair<int, int> positions;
@@ -564,6 +567,10 @@ bool Solution::swap_best_block_neighbor(unsigned int block_size)
 
       for (unsigned int to_route = from_route+1; to_route < this->routes.size(); to_route++)
       {
+        if (this->routes[to_route].size()-2 < block_size+1) {
+          // Not enough clients to from a block
+          continue;
+        }
         // Make the first block with this route intended to swap with the other block previously made
         unsigned int to_previous_client = 0;
         auto to_client = next(this->routes[to_route].begin(), 1);
