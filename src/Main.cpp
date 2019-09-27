@@ -7,13 +7,14 @@
 #include <unistd.h>
 using namespace std;
 
-int main() {
+int main()
+{
     string file_names[] = {
-        //"data/P-n19-k2.txt",
+        "data/P-n19-k2.txt",
         //"data/P-n45-k5.txt",
         //"data/P-n55-k7.txt",
         //"data/P-n20-k2.txt",
-        "data/P-n50-k10.txt",
+        //"data/P-n50-k10.txt",
         //"data/P-n23-k8.txt",
         //"data/P-n51-k10.txt"
     };
@@ -91,32 +92,31 @@ int main() {
             cout << "], \n";
         }*/
 
-        
         // Running construction
         time_t begin, middle, end;
 
         Scenary scenary(clients, vehicles, capacity, demands, distances);
-        unsigned int cost_construction, cost_vns; 
+        unsigned int cost_construction, cost_vns;
 
         ofstream out_file;
         out_file.open("statistics.csv");
-        for(short int i = 0; i < 11; i++){
+        for (short int i = 0; i < 11; i++)
+        {
             Solution solution(&scenary);
             begin = time(NULL);
             cost_construction = solution.construction();
-            
+
             middle = time(NULL);
             out_file << cost_construction << ", " << difftime(middle, begin) << ", ";
 
             cost_vns = solution.vns(100);
             end = time(NULL);
-            out_file << cost_vns << ", " << difftime(end, middle)  << "\n";
+            out_file << cost_vns << ", " << difftime(end, middle) << "\n";
 
-            // Sleep for 5 seconds
-            usleep(5000000);
+            // Sleep for 3 seconds
+            usleep(3000000);
         }
 
         out_file.close();
-       
     }
 }
